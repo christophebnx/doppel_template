@@ -1,0 +1,6 @@
+id: llm_ingest_sourced
+skill: /ingest
+fixtures: ingest-basic
+now: "2026-11-23 08:00"
+prompt: "Run /ingest in unattended mode."
+rubric: tests/evals/rubrics/ingest-sourced.md

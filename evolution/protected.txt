@@ -1,0 +1,20 @@
+# Protected core — never modified by /improve in autonomous mode, whatever `evolution.autonomy` / `merge` say.
+# Any change to these paths needs a PR merged by the owner. Read by scripts/check_diff.py (this file is protected too).
+# Syntax: one path per line; a trailing / protects a directory; `file#core` protects only the block between
+# <!-- core:begin --> and <!-- core:end --> in that file; `dir/**#existing` protects existing files (additions allowed).
+CLAUDE.md#core
+config.yaml
+evolution/protected.txt
+.claude/skills/evolve/
+.claude/skills/improve/
+.claude/agents/steward.md
+.claude/settings.json
+scripts/check_diff.py
+scripts/signals.py
+scripts/evals.py
+scripts/evolution.py
+scripts/redact.py
+scripts/hooks/
+tests/evals/scenarios/**#existing
+tests/evals/rubrics/**#existing
+tests/evals/conftest.py

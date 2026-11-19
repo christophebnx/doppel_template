@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Heavy raw media in the inbox: never committed (transcripts/fiches are kept)
+inbox/_raw/**/*.mp3
+inbox/_raw/**/*.m4a
+inbox/_raw/**/*.wav
+inbox/_raw/**/*.ogg
+inbox/_raw/**/*.opus
+inbox/_raw/**/*.flac
+inbox/_raw/**/*.aac
+inbox/_raw/**/*.mp4
+inbox/_raw/**/*.mov
+inbox/_raw/**/*.mkv
+inbox/_raw/**/*.webm
+inbox/_raw/**/*.avi
+
+# OS / editors
+.DS_Store
+*.swp
+
+# Raw archives and mail exports: never committed (doppel keeps synthesized knowledge only)
+*.zip
+*.eml
+*.msg
+
+# Generated pages (published as Artifacts, not committed)
+.doppel/
