@@ -11,6 +11,17 @@ capacity:
 transcription:
   model: small            # faster-whisper model (optional extra: uv sync --extra audio)
   language: fr
+climate:                  # weather-constrained tasks (task fields `climate` + `location`; scripts/weather.py)
+  work_hours: "08:00-18:00"   # when a weather-constrained slot may be placed
+  work_days: [lundi, mardi, mercredi, jeudi, vendredi, samedi, dimanche]
+  min_score: 0.6              # probability that the conditions hold; below it the slot is « risqué » and /today re-places it
+  default_duration_h: 2       # slot length when the task has no estimate
+  step_min: 30
+  frost_c: 1.0                # « hors-gel » = air ≥ this temperature (°C) during the whole slot
+  horizon_days: 7             # search range when the task has no deadline
+  # forecast: Open-Meteo (free, no key, ≤ 16 days); only the place's coordinates rounded to ~1 km are sent
+# places: where tasks happen (slug: {label, lat, lon}) — written by `weather.py place-add <slug> --query "<commune>"`
+places: {}
 evolution:                # self-improvement framework (see CLAUDE.md « Runs and retro » and evolution/)
   capture: true               # signals + runs
   review: weekly              # off | weekly | manual

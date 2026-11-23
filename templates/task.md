@@ -12,6 +12,8 @@ actual_h:
 deadline:                  # YYYY-MM-DD — the day it is DUE (« pour jeudi »)
 scheduled_on:              # YYYY-MM-DD — the day the owner wants to DO it (« jeudi »)
 scheduled_window:          # optional HH:MM-HH:MM on that day (« jeudi matin » = 08:30-12:30)
+location:                  # optional place slug of config.yaml: places (where the task happens, for the weather)
+climate: []               # optional weather conditions needed: sec, sec-avant:6h, hors-gel, temp-min:5, temp-max:28, vent-max:40, jour
 depends_on: []             # [T-nnnn, person:<slug>] — what MY work needs (blocked)
 waiting_on:                # person:<slug> — status waiting only: someone else must deliver this item
 expected_by:               # YYYY-MM-DD date announced by that person (optional)

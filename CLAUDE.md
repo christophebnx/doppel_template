@@ -34,7 +34,7 @@ the « Domain » section at the end; everything else is the framework.
 
 | Path | Content |
 |---|---|
-| `config.yaml` | owner, domain, languages, timezone, executors, evolution settings, **projects** (last key, rewritten by `project.py`) |
+| `config.yaml` | owner, domain, languages, timezone, executors, climate, places, evolution settings, **projects** (last key, rewritten by `project.py`) |
 | `today.md` | daily sheet (overwritten every day by `/today`) |
 | `questions.md` | open questions for the owner (all agents write here); answered via `/answer` or `/wrap` |
 | `preferences.md` | the owner's preferences on how doppel works (written by `/wrap`), read first by every session and agent |
@@ -58,6 +58,7 @@ the « Domain » section at the end; everything else is the framework.
 - **Priority**: `P1` must happen this week / blocking others · `P2` should · `P3` could.
 - **Executor**: `me` (owner) · `doppel` (drafting, analysis, preparation done by doppel → `outbox/`) · any extra executor declared in `config.yaml: executors`.
 - **Deadline vs fixed day**: `deadline` = the day it is due (« pour jeudi »); `scheduled_on` (+ optional `scheduled_window`) = the day the owner wants to do it (« jeudi matin »).
+- **Weather**: optional `climate` (`sec`, `hors-gel`, `vent-max:40`, `jour`…) + `location` (a `config.yaml: places` slug) → the slot is chosen by `weather.py` (`/place`), never by hand.
 - **Estimates**: `estimate_h` is the raw estimate; scripts multiply by `estimate_correction`. Never pre-apply it.
 - **Log line**: `- AAAA-MM-JJ HH:MM · <projet> · <type> · <texte> · <source>` with type `done|decision|info|blocked|planned`. Write it with `scripts/logbook.py add` only.
 - **Sources**: repo-relative path, e.g. `inbox/_processed/2026-11-16_mail_demande.md`; for owner answers, the answer archive `inbox/_processed/AAAA-MM-JJ_note_reponses.md#Q-012`; for owner statements in a conversation, the `/wrap` item `inbox/_processed/AAAA-MM-JJ_conversation_<sujet>.md` (`owner:AAAA-MM-JJ` only for an immediate update made by a skill like `/done`).
@@ -75,6 +76,7 @@ the « Domain » section at the end; everything else is the framework.
 | `logbook.py` | `add`, `since --days N [--project]`, `old --weeks 8` |
 | `project.py` | `add <slug> --name` (folders + brain + config), `set <slug> k=v`, `list`, `close <slug> [--dry-run]` |
 | `today.py` | facts for `today.md` (`--write`) |
+| `weather.py` | `places`, `place-add <slug> --query`, `forecast <place>`, `best`, `place <T-id…\|--pending> [--apply]` (slot + moves), `check [--apply]` |
 | `index.py` | regenerate all `_index.md` (`--check` to verify) — run after any data change |
 | `calibrate.py` | recompute `estimate_correction` from done tasks (`--write`) |
 | `wrap.py` | `context --since D`: what this conversation already persisted (for `/wrap`) |
@@ -103,6 +105,7 @@ If `uv` is missing: `python3 scripts/<name>.py` with `pyyaml` installed.
 | `/answer` | apply the owner's answers in `questions.md`, unblock tasks, archive answered questions |
 | `/done <texte>` | log what was done, update task status / actual_h |
 | `/status [Nj] [audience] [projet]` | status report for an audience → `outbox/` |
+| `/place [T-id…]` | weather-constrained tasks: most favourable slot from the forecast, replans what is there |
 | `/today` | `today.md`: in progress, due dates, P1, follow-ups due, questions, things to validate, doppel's own changes |
 | `/consolidate` | curator on branch `consolidate/AAAA-Wnn` + PR |
 | `/wrap` | end of conversation: persist what only exists in the conversation → « Session supprimable. » |

@@ -9,6 +9,7 @@
   tasks.py new … --status waiting --waiting-on person:jean-exemple [--expected-by 2026-11-26] [--from 2026-11-20]
                follow_up_after = expected_by + 1 workday, else (--from|today) + 3 workdays
   tasks.py new … --scheduled-on 2026-11-26 [--window 08:30-12:30]   day to DO it (deadline = day it is DUE)
+  tasks.py new … --climate sec,hors-gel --location maison      weather-constrained task (placed by weather.py place)
   tasks.py followups [--json]            waiting tasks whose follow_up_after is today or past, grouped by person
   tasks.py bump-followup T-0001 [--workdays 3]    after a follow-up was drafted: next check in N workdays
   tasks.py list [--status todo,doing] [--project p] [--executor me] [--json]
@@ -31,17 +32,17 @@ from ids import next_id
 
 FIELD_ORDER = [
     "id", "project", "title", "status", "priority", "executor", "estimate_h", "estimate_range_h", "confidence",
-    "actual_h", "deadline", "scheduled_on", "scheduled_window", "depends_on", "waiting_on", "expected_by", "follow_up_after",
+    "actual_h", "deadline", "scheduled_on", "scheduled_window", "location", "climate", "depends_on", "waiting_on", "expected_by", "follow_up_after",
     "sources", "created", "updated",
 ]
 STATUSES = ("clarify", "todo", "doing", "blocked", "waiting", "done", "dropped")
 OPTIONAL_FIELDS = ("estimate_range_h", "waiting_on", "expected_by", "follow_up_after", "scheduled_on",
-                   "scheduled_window")  # omitted when empty
+                   "scheduled_window", "location", "climate")  # omitted when empty
 DATE_FIELDS = ("deadline", "expected_by", "follow_up_after", "scheduled_on")
 WINDOW_RE = re.compile(r"^\d{2}:\d{2}-\d{2}:\d{2}$")
 PRIORITIES = ("P1", "P2", "P3")
 EXECUTORS = ("me", "doppel")  # default; extend with config.yaml `executors:` (e.g. claude-code, assistant)
-LIST_FIELDS = ("depends_on", "sources", "estimate_range_h")
+LIST_FIELDS = ("depends_on", "sources", "estimate_range_h", "climate")
 
 DEFAULT_BODY = "## Contexte\n\n## Questions ouvertes\n\n## Progression\n"
 
@@ -78,6 +79,8 @@ def _coerce(key: str, value: str, root: Path | None = None):
         return None if value in ("", "null", "none") else parse_hours(value)
     if key == "estimate_range_h":
         return [parse_hours(v) for v in value.split(",") if v.strip()]
+    if key == "climate":
+        return _climate(value) or None
     if key in LIST_FIELDS:
         return [v.strip() for v in value.split(",") if v.strip()]
     if value in ("", "null", "none"):
@@ -100,6 +103,12 @@ def _coerce(key: str, value: str, root: Path | None = None):
     return parsed
 
 
+def _climate(value) -> list[str]:
+    """Validated climate tokens (scripts/weather.py: sec, sec-avant:6h, hors-gel, temp-min:5, vent-max:40, jour)."""
+    from weather import parse_climate  # lazy: weather imports tasks
+    return parse_climate(value).tokens
+
+
 def follow_up_date(expected_by: dt.date | None, ref: dt.date) -> dt.date:
     """Announced date + 1 workday; without an announced date, reference date + 3 workdays."""
     return add_workdays(expected_by, 1) if expected_by else add_workdays(ref, 3)
@@ -108,7 +117,7 @@ def follow_up_date(expected_by: dt.date | None, ref: dt.date) -> dt.date:
 def new_task(root: Path, project: str, title: str, *, status="todo", priority="P2", executor="me",
              estimate=None, confidence=None, deadline=None, depends_on=None,
              sources=None, body: str | None = None, waiting_on=None, expected_by=None, ref_date=None,
-             scheduled_on=None, scheduled_window=None) -> Path:
+             scheduled_on=None, scheduled_window=None, climate=None, location=None) -> Path:
     today = now_fn(load_config(root)).date()
     if status == "waiting" and not waiting_on:
         raise SystemExit("status waiting requires --waiting-on person:<slug>")
@@ -124,6 +133,7 @@ def new_task(root: Path, project: str, title: str, *, status="todo", priority="P
         "waiting_on": waiting_on, "expected_by": expected, "follow_up_after": follow,
         "scheduled_on": parse_date(scheduled_on),
         "scheduled_window": _coerce("scheduled_window", scheduled_window) if scheduled_window else None,
+        "location": location or None, "climate": _climate(climate) if climate else None,
         "sources": sources or [], "created": today, "updated": today,
     })
     for k in OPTIONAL_FIELDS:
@@ -152,7 +162,7 @@ def set_fields(root: Path, tid: str, assignments: list[str]) -> dict:
                 continue
             cur = list(meta.get(k) or [])
             cur += [x for x in _coerce(k, v) if x not in cur] if k in LIST_FIELDS else [_coerce(k, v)]
-            meta[k] = cur
+            meta[k] = cur or None if k == "climate" else cur
         else:
             k, v = a.split("=", 1)
             meta[k] = _coerce(k, v, root)
@@ -239,6 +249,8 @@ def main(argv=None) -> int:
     n.add_argument("--depends-on"); n.add_argument("--source", action="append")
     n.add_argument("--body"); n.add_argument("--waiting-on"); n.add_argument("--expected-by")
     n.add_argument("--scheduled-on", help="day the owner wants to DO it (≠ deadline)"); n.add_argument("--window", help="HH:MM-HH:MM on that day")
+    n.add_argument("--climate", help="weather conditions needed, e.g. sec,hors-gel (see weather.py)")
+    n.add_argument("--location", help="place slug of config.yaml: places (where the task happens)")
     n.add_argument("--from", dest="ref_date", help="reference date for the follow-up (date of the source message)")
     sub.add_parser("followups").add_argument("--json", action="store_true")
     bf = sub.add_parser("bump-followup"); bf.add_argument("id"); bf.add_argument("--workdays", type=int, default=3)
@@ -255,7 +267,8 @@ def main(argv=None) -> int:
                      depends_on=deps, sources=args.source,
                      body=args.body.replace("\\n", "\n") if args.body else None,
                      waiting_on=args.waiting_on, expected_by=args.expected_by, ref_date=args.ref_date,
-                     scheduled_on=args.scheduled_on, scheduled_window=args.window)
+                     scheduled_on=args.scheduled_on, scheduled_window=args.window,
+                     climate=args.climate, location=args.location)
         print(p.relative_to(root))
     elif args.cmd == "set":
         meta = set_fields(root, args.id, args.assign)

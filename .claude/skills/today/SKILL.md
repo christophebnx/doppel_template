@@ -1,6 +1,6 @@
 ---
 name: today
-description: Write today.md at the repo root — tasks in progress, fixed-day tasks, due dates and overdue, open P1, follow-ups due, open questions, deliverables to validate in outbox/, doppel's own changes (briefs to approve, merges, reverts), plus 1–3 focus lines. Readable in one minute. Scheduled daily at the end of the morning pass; also manual.
+description: Write today.md at the repo root — re-checks the weather of climate tasks first, then tasks in progress, fixed-day tasks, due dates and overdue, open P1, follow-ups due, open questions, deliverables to validate in outbox/, doppel's own changes (briefs to approve, merges, reverts), plus 1–3 focus lines. Readable in one minute. Scheduled daily at the end of the morning pass; also manual.
 argument-hint: ""
 ---
 
@@ -10,6 +10,10 @@ argument-hint: ""
 
 ## Steps
 1. `git pull --rebase origin main`.
+1b. Weather: `uv run scripts/weather.py check --apply` — re-places a climate task whose slot fell below
+   `climate.min_score` with the latest forecast (when a clearly better slot exists, moving what is planned there);
+   then `uv run scripts/weather.py place --pending --apply` for climate tasks the forecast now covers. Forecast
+   unavailable → go on; the sheet says so.
 2. `uv run scripts/today.py --write` — deterministic sections (never edit them by hand; re-run the script instead),
    including « doppel lui-même »: briefs to approve, PRs to arbitrate, changes merged since yesterday, reverts, kill switch.
 3. **reporter**: replace the Focus placeholder with 1–3 lines — what matters today and why (e.g. « Rendre T-0012 :
@@ -17,7 +21,8 @@ argument-hint: ""
 4. Commit `doppel(today): AAAA-MM-JJ`; push. Print `today.md`.
 
 ## Reads / writes
-Reads tasks, questions, outbox, evolution briefs, config. Writes `today.md` only (overwritten daily).
+Reads tasks, questions, outbox, evolution briefs, config, the forecast of climate tasks. Writes `today.md` (overwritten
+daily) and, through `weather.py`, the slots of re-placed climate tasks (+ progression and log lines).
 
 ## Unattended
 Runs fully (last step of the daily pass); commit to `main`.

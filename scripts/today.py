@@ -49,6 +49,20 @@ def scheduled_facts(tasks: dict, today: dt.date) -> dict:
     return out
 
 
+def climate_facts(root: Path, tasks: dict) -> dict:
+    """Weather-constrained tasks (scripts/weather.py check): to place, placed and now risky. Network only if needed;
+    a forecast failure never breaks the sheet."""
+    if not any(t.meta.get("climate") and t.status in OPEN_STATUSES for t in tasks.values()):
+        return {}
+    try:
+        from weather import check
+        res = check(root)
+    except SystemExit as e:
+        return {"error": str(e)}
+    return {"to_place": res["to_place"], "risky": [i for i in res["placed"] if i.get("risky")],
+            "errors": res["errors"]}
+
+
 def evolution_facts(root: Path, now: dt.datetime) -> dict:
     """Self-improvement news: briefs to approve, PRs to arbitrate, changes merged / reverted since yesterday."""
     from evolution import load_briefs, status_time, stop_path
@@ -108,6 +122,7 @@ def facts(root: Path) -> dict:
         "date": str(today), "weekday": DAY_FR[today.weekday()], "week": week_of(today), "now": now.strftime("%H:%M"),
         "tasks": task_facts(tasks, today),
         "scheduled": scheduled_facts(tasks, today),
+        "climate": climate_facts(root, tasks),
         "follow_ups": due_followups(root),
         "questions": _questions(root),
         "to_validate": to_validate,
@@ -132,6 +147,14 @@ def render(f: dict, focus: str | None = None) -> str:
         L += ["", "## Prévu ce jour (jour fixé)"]
         L += [f"- {x['task']} {x['title']}" + (f" ({x['window']})" if x.get("window") else "") for x in sc.get("today", [])]
         L += [f"- ⚠ prévue le {x['date']}, non faite : {x['task']} {x['title']}" for x in sc.get("missed", [])]
+    cl = f.get("climate") or {}
+    if any(cl.get(k) for k in ("to_place", "risky", "errors", "error")):
+        L += ["", "## Météo (tâches à contrainte climat)"]
+        L += [f"- à placer : {x['task']} {x['title']} ({', '.join(x['climate'])}) → `weather.py place {x['task']}`"
+              for x in cl.get("to_place", [])]
+        L += [f"- ⚠ météo défavorable : {x['task']} {x['title']} le {x['date']} {x.get('window') or ''} "
+              f"({round(x['score'] * 100)} %, {', '.join(x['climate'])})" for x in cl.get("risky", [])]
+        L += [f"- prévision indisponible : {e}" for e in cl.get("errors", []) + ([cl["error"]] if cl.get("error") else [])]
     L += ["", "## Échéances"]
     L += [f"- ⚠ en retard : {_task_line(x)[2:]}" for x in t["overdue"]]
     L += [_task_line(x) for x in t["due_soon"]]

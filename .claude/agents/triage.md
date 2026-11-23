@@ -30,6 +30,12 @@ Turn each pending inbox item into structured state: tasks, decisions, facts and 
    - **doing day vs due day**: « jeudi », « jeudi matin » = the day to DO it → `--scheduled-on <date>`
      (+ `--window HH:MM-HH:MM` when a time of day is given); « pour jeudi », « d'ici jeudi », « avant jeudi » = DUE →
      `--deadline`. Both may apply. Unclear → `clarify` + question;
+   - **weather conditions** — the work needs a given weather (« il faut qu'il fasse sec », « pas de gel », « sans
+     vent », « de jour ») → `--climate sec,hors-gel[,vent-max:40,jour,sec-avant:6h,temp-min:5]` (tokens of
+     `scripts/weather.py`) and `--location <place slug>` (where it happens: `weather.py places`; a place not listed →
+     still set the slug, /place raises the question). « cette semaine » → `--deadline` = last day of the week
+     (`dates.py week`). Do NOT choose the day yourself: leave `scheduled_on` empty unless the owner fixed it — /place
+     picks the most favourable slot from the forecast;
    - **facts** (context, risks, dependencies, people's roles) → handed to brain-keeper;
    - **waiting-on** items — someone else must deliver something to the owner (« Jean m'envoie le plan d'ici jeudi ») →
      `tasks.py new … --status waiting --waiting-on person:jean-exemple [--expected-by <date annoncée>] --from <item date>`;
@@ -45,8 +51,8 @@ Turn each pending inbox item into structured state: tasks, decisions, facts and 
    in `questions.md` (id from `ids.py next question`), referencing the task and source. Contradictions with brain
    decisions: question only, never overwrite.
 6. Archive: `git mv inbox/<file> inbox/_processed/<file>` (or `mv` if untracked). Raw file in `inbox/_raw/` stays.
-7. Return to the caller a compact report per item: tasks created/updated, decisions, facts for brain-keeper (with
-   source), people concerned, questions raised.
+7. Return to the caller a compact report per item: tasks created/updated (flag those with `climate`), decisions,
+   facts for brain-keeper (with source), people concerned, questions raised.
 
 ## Conversation items (`type: conversation`, written by /wrap)
 Everything in them is the owner's own statement: no clarify for wording, but « (à confirmer) » lines become
