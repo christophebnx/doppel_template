@@ -304,9 +304,15 @@ def candidate_starts(day_from: dt.date, day_to: dt.date, minutes: int, ccfg: dic
         d += dt.timedelta(days=1)
 
 
-def busy_slots(tasks: dict, exclude: set) -> list[tuple[dt.datetime, dt.datetime, str]]:
-    """Time slots already taken by open tasks with a scheduled day AND window."""
+def busy_slots(tasks: dict, exclude: set, root: Path | None = None) -> list[tuple[dt.datetime, dt.datetime, str]]:
+    """Time slots already taken: open tasks with a scheduled day AND window, and the calendar events collected by
+    /collect (agenda/busy.yaml, id `agenda:<title>` — never moved)."""
     out = []
+    if root is not None:
+        from collect import load_busy
+        for b in load_busy(root):
+            s, e = parse_window(parse_date(b["date"]), str(b["window"]))
+            out.append((s, e, f"agenda:{b.get('title') or '?'}"))
     for t in tasks.values():
         if t.id in exclude or t.status in NOT_PLANNABLE:
             continue
@@ -404,13 +410,16 @@ def plan_task(root: Path, tid: str, *, d_from=None, d_to=None, tasks: dict | Non
     if not ranked:
         return {**base, "status": "beyond-forecast",
                 "reason": f"aucune prévision entre {day_from} et {day_to} (horizon {fc.end:%Y-%m-%d}) : replacer plus tard"}
-    busy = busy_slots(tasks, {tid}) + list(extra_busy or [])
+    busy = busy_slots(tasks, {tid}, root) + list(extra_busy or [])
     feasible = []
     for x in ranked:
         conflicts = _overlaps(x["start"], x["end"], busy)
         moves, ok = [], True
         taken = [b for b in busy if b not in conflicts] + [(x["start"], x["end"], tid)]
         for (_, _, cid) in conflicts:
+            if cid not in tasks:  # a calendar appointment: never moved by doppel
+                ok = False
+                break
             ct = tasks[cid]
             if ct.meta.get("climate"):
                 ok = False

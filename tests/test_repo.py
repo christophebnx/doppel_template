@@ -6,7 +6,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
 SKILLS = ["add", "ingest", "answer", "ask", "done", "status", "today", "consolidate", "wrap", "signal", "evolve",
-          "improve", "new-skill", "place"]
+          "improve", "new-skill", "place", "collect", "setup", "upgrade"]
 AGENTS = {"triage": "sonnet", "brain-keeper": "sonnet", "curator": "sonnet", "reporter": "haiku", "steward": "opus"}
 TEMPLATES = ["task", "brain", "status", "inbox-item", "outbox-item", "signal", "evolution-brief", "skill", "agent"]
 

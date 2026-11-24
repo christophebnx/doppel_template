@@ -13,7 +13,7 @@ Optional list of inbox files; default all `inbox/*.md` listed in `inbox/_index.m
 
 ## Steps
 1. `git pull --rebase origin main`; `uv run scripts/index.py`; `uv run scripts/dates.py now`.
-2. **triage** agent on the items (batch of ≤ 10 per call, oldest first). It creates/updates tasks (incl. `waiting` with
+2. **triage** agent on the items (incl. `mail`, `facture`, `rdv` items written by /collect) (batch of ≤ 10 per call, oldest first). It creates/updates tasks (incl. `waiting` with
    `follow_up_after`), raises questions, archives items to `inbox/_processed/`, and returns facts and decisions per project.
 3. **brain-keeper** agent with the facts/decisions returned (grouped by project): updates `projects/<p>/brain.md`.
 4. Domain agents registered for ingestion (CLAUDE.md « Domain », e.g. a comms agent drafting follow-ups) — none by default.

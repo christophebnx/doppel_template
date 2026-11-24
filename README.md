@@ -15,22 +15,16 @@ session (any account, local or cloud, scheduled or interactive) can operate it f
 
 ## Start a new doppel
 
-1. Create a repository from this template (« Use this template » on GitHub, or copy the files).
-2. Install and test:
+1. On GitHub: « Use this template » → **Private** repository (collected mails and appointments are committed to it;
+   `/collect` refuses to run in a repository not declared private).
+2. Open a Claude Code session on the new repository and run **`/setup`**: an interview that defines what this AI
+   brain is for (owner, domain, what a project is, objectives), tunes doppel to those objectives (brain sections,
+   status audiences, preferences, places), connects the project's mailbox and calendars (Gmail / Google Calendar
+   connectors — accounts are chosen per project, never in the template) and creates the scheduled tasks.
+3. Later, **`/upgrade`** brings the template's improvements into the project (framework files only, 3-way merge that
+   keeps your own edits, data untouched) on a branch with a PR you merge.
 
-```bash
-uv sync
-```
-
-```bash
-uv run pytest
-```
-
-3. Fill in `config.yaml` (`owner`, `domain`, `timezone`, `language`), the « Domain » section of `CLAUDE.md`, and the
-   domain sections of `templates/brain.md` — see [`docs/extending.md`](docs/extending.md) § 1.
-4. Add your first project: `uv run scripts/project.py add <slug> --name "…"`.
-5. Add domain skills with `/new-skill` (or port modules from `doppel_klee`: planning, people, meetings, …).
-6. Create the scheduled tasks of [`docs/scheduling.md`](docs/scheduling.md).
+Manual alternative: `uv sync && uv run pytest`, then [`docs/extending.md`](docs/extending.md) § 1.
 
 Optional audio/video transcription: `uv sync --extra audio` (faster-whisper).
 
@@ -40,12 +34,15 @@ Optional audio/video transcription: `uv sync --extra audio` (faster-whisper).
 |---|---|
 | ask something about a project | `/ask où en est le dossier X ?` (answer with sources, nothing modified) |
 | drop something in (paste text, screenshot, file) | `/add [--project p] [--from personne] [--now]` |
+| pull new mails, invoices and appointments now (private repo, connectors) | `/collect` |
 | process the inbox now | `/ingest` |
 | answer doppel's questions | write after `- R:` in `questions.md`, then `/answer` |
 | record what I did | `/done T-0004 fini 2h30` |
 | a status for someone | `/status 5j externe demo-project` · `/status 5j interne` |
 | see my day in one minute | `/today` (or open `today.md`) |
 | fit a weather-dependent task (« sec, hors gel, cette semaine ») | say it, or `/place T-0012` |
+| take the latest template improvements | `/upgrade` (PR to merge) |
+| retune doppel (objectives, accounts, calendars) | `/setup --retune` |
 | end a conversation (any account, any device) | `/wrap` → « Session supprimable. » |
 | something in doppel is wrong / annoying | `/signal le status est trop long` |
 | review how doppel wants to improve itself | `/evolve` (weekly) → `/evolve approve E-001` → `/improve E-001` |

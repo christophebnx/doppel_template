@@ -7,6 +7,8 @@ planning, people, meetings, multi-client isolation, Claude Code briefs and onboa
 
 ## 1. Fill in the identity (15 minutes)
 
+`/setup` does all of § 1 in a conversation (and connects mail and calendars); the steps below are what it does.
+
 1. `config.yaml`: `owner`, `domain`, `timezone`, `language.data`, `executors` (extra task executors, e.g.
    `claude-code` for a developer, `assistant` for a human assistant).
 2. `CLAUDE.md` « Domain » section: vocabulary, what a project is, the item types that arrive, the deliverables

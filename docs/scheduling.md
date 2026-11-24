@@ -8,10 +8,13 @@ prompts, or get their own task.
 
 | Task | When | Cron (with time zone) | Skills | Git |
 |---|---|---|---|---|
-| doppel — daily | Mon–Fri 06:47 | `CRON_TZ=Europe/Brussels 47 6 * * 1-5` | `/ingest` → (domain skills) → `/today` | commit + push `main` |
+| doppel — daily | Mon–Fri 06:47 | `CRON_TZ=Europe/Brussels 47 6 * * 1-5` | `/collect` → `/ingest` → (domain skills) → `/today` | commit + push `main` |
 | doppel — consolidation | Fri 18:41 | `CRON_TZ=Europe/Brussels 41 18 * * 5` | `/consolidate` | branch `consolidate/AAAA-Wnn` + PR |
 | doppel — evolution review | Fri 19:37 | `CRON_TZ=Europe/Brussels 37 19 * * 5` | `/evolve` | commit + push `main` (bookkeeping only) |
 | doppel — improve | Sat 08:13 | `CRON_TZ=Europe/Brussels 13 8 * * 6` | `/improve --pending` | branch `evolve/E-nnn` + PR (merge per config) |
+
+Connectors: the daily task needs the **Gmail** and **Google Calendar** connectors attached to the scheduled task when
+`/collect` is enabled (a scheduled task only gets the connectors it was created with). doppel only reads them.
 
 ## Common preamble (included verbatim in each prompt)
 
@@ -45,6 +48,9 @@ Rules for this run:
 <common preamble>
 
 Task:
+A0. Run the /collect skill (.claude/skills/collect/SKILL.md) with --no-ingest: new mails, invoices and calendar
+   changes become inbox items. If `uv run scripts/collect.py guard` refuses (collection off or repository not
+   declared private), skip A0 silently.
 A. Run the /ingest skill: follow .claude/skills/ingest/SKILL.md in unattended mode on every pending item of inbox/.
    If nothing is pending, skip to B without committing.
 B. Run the scheduled domain skills listed in CLAUDE.md « Domain » (none by default), each in unattended mode.
