@@ -1,10 +1,11 @@
 ---
 date:                      # YYYY-MM-DD HH:MM of the original message/event (not of the ingestion)
-type: mail                 # mail | meeting | message | ticket | note | image | audio | video | doc | conversation (+ domain types)
+type: mail                 # mail | facture | rdv | meeting | message | ticket | note | image | audio | video | doc | conversation (+ domain types)
 from: <slug ou nom>        # person slug when known
 project_hint:              # slug when known, else empty
 raw:                       # inbox/_raw/<file> | none (pasted text)
-added:                     # YYYY-MM-DD HH:MM (by /add)
+added:                     # YYYY-MM-DD HH:MM (by /add or /collect)
+collected:                 # gmail:<hash> | gcal:<hash> — only for items written by /collect (dedup key)
 ---
 
 <!-- File name: inbox/AAAA-MM-JJ_<type>_<slug>.md -> moved to inbox/_processed/ by /ingest.

@@ -18,3 +18,5 @@ scripts/hooks/
 tests/evals/scenarios/**#existing
 tests/evals/rubrics/**#existing
 tests/evals/conftest.py
+scripts/template.py
+.claude/skills/upgrade/

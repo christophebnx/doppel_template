@@ -20,6 +20,23 @@ climate:                  # weather-constrained tasks (task fields `climate` + `
   frost_c: 1.0                # « hors-gel » = air ≥ this temperature (°C) during the whole slot
   horizon_days: 7             # search range when the task has no deadline
   # forecast: Open-Meteo (free, no key, ≤ 16 days); only the place's coordinates rounded to ~1 km are sent
+template:                 # the doppel template this repository follows (/setup records it, /upgrade applies its changes)
+  repo: https://github.com/christophebnx/doppel_template
+  ref: main
+  base:                       # template commit the framework files correspond to (set by /setup, moved by /upgrade)
+  exclude: []                 # framework paths this project owns and never takes from the template (e.g. [README.md])
+collect:                  # automatic intake from the owner's mailbox + calendars (skill /collect, scripts/collect.py)
+  enabled: false              # turn on in the owner's PRIVATE doppel repository only
+  private_repo: false         # the owner attests this repository is private: collected mails/events are committed here
+  mail:
+    query: "in:inbox category:primary"   # Gmail search for ordinary mail (Primary tab: no promotions/social/updates)
+    invoices_query: "has:attachment filename:pdf (facture OR invoice OR factuur OR rekening OR \"note d'honoraires\")"
+    exclude_from: []          # sender substrings never collected (e.g. [noreply@, newsletter@])
+    first_sync_days: 7        # look-back of the very first pass
+    max_body_chars: 6000
+  calendars: []               # [{id: <calendar id from list_calendars>, alias: <slug>}] — set in the private repo only
+  calendar_days_ahead: 21
+  calendar_days_back: 1
 # places: where tasks happen (slug: {label, lat, lon}) — written by `weather.py place-add <slug> --query "<commune>"`
 places: {}
 evolution:                # self-improvement framework (see CLAUDE.md « Runs and retro » and evolution/)

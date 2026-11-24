@@ -34,10 +34,11 @@ the « Domain » section at the end; everything else is the framework.
 
 | Path | Content |
 |---|---|
-| `config.yaml` | owner, domain, languages, timezone, executors, climate, places, evolution settings, **projects** (last key, rewritten by `project.py`) |
+| `config.yaml` | owner, domain, languages, timezone, executors, template, collect, climate, places, evolution settings, **projects** (last key, rewritten by `project.py`) |
 | `today.md` | daily sheet (overwritten every day by `/today`) |
 | `questions.md` | open questions for the owner (all agents write here); answered via `/answer` or `/wrap` |
 | `preferences.md` | the owner's preferences on how doppel works (written by `/wrap`), read first by every session and agent |
+| `collect/`, `agenda/` | `/collect` sync state (`state.json`, hashed ids) and calendar busy slots (`busy.yaml`) |
 | `inbox/` | items to process (`AAAA-MM-JJ_<type>_<slug>.md`); `_raw/` originals; `_processed/` archived items (= sources) |
 | `tasks/` | `T-nnnn.md` tasks; `_archive/AAAA/` done/dropped tasks > 30 days |
 | `projects/<slug>/` | `brain.md` knowledge base, `status/` sent status reports |
@@ -76,6 +77,9 @@ the « Domain » section at the end; everything else is the framework.
 | `logbook.py` | `add`, `since --days N [--project]`, `old --weeks 8` |
 | `project.py` | `add <slug> --name` (folders + brain + config), `set <slug> k=v`, `list`, `close <slug> [--dry-run]` |
 | `today.py` | facts for `today.md` (`--write`) |
+| `setup.py` | `status` (checklist), `set owner=… domain=…`, `domain --file`, `collect --enable --private --calendar id=alias` |
+| `template.py` | `status`, `init --repo [--base]`, `upgrade [--dry-run]` (framework files only, config keys added, `template.base` moved) |
+| `collect.py` | `guard`, `plan` (Gmail queries, calendar windows), `ingest-mail --file`, `ingest-events --calendar --file`, `done` |
 | `weather.py` | `places`, `place-add <slug> --query`, `forecast <place>`, `best`, `place <T-id…\|--pending> [--apply]` (slot + moves), `check [--apply]` |
 | `index.py` | regenerate all `_index.md` (`--check` to verify) — run after any data change |
 | `calibrate.py` | recompute `estimate_correction` from done tasks (`--write`) |
@@ -101,6 +105,7 @@ If `uv` is missing: `python3 scripts/<name>.py` with `pyyaml` installed.
 |---|---|
 | `/ask [--project] <question>` | answer a question about a project from the repo (indexes → brain → tasks → log), with sources; read-only |
 | `/add [--project] [--from] [--now]` | paste anything (text, image, audio, pdf…) → normalized inbox item (+ raw) |
+| `/collect` | mailbox + calendars (Gmail / Google Calendar connectors, read-only) → `mail`/`facture`/`rdv` inbox items → `/ingest`; private repo only |
 | `/ingest` | process the inbox: triage → brain-keeper → reporter; update indexes |
 | `/answer` | apply the owner's answers in `questions.md`, unblock tasks, archive answered questions |
 | `/done <texte>` | log what was done, update task status / actual_h |
@@ -112,6 +117,8 @@ If `uv` is missing: `python3 scripts/<name>.py` with `pyyaml` installed.
 | `/signal <texte>` | the owner reports a problem with doppel → well-formed `user` signal |
 | `/evolve [approve E-nnn\|stop\|resume]` | steward: signals → decisions → briefs `E-nnn`; follow-up of past changes (validate / revert) |
 | `/improve [E-nnn\|--pending]` | execute an evolution brief on `evolve/E-nnn`: regression scenario red → fix → green, evals, check_diff, PR |
+| `/setup` | interactive initialisation of a project created from the template: purpose, objectives, tuning, mail/calendar accounts, scheduled tasks |
+| `/upgrade [--dry-run]` | take the template's framework changes (3-way, data untouched) on `template-sync/AAAA-MM-JJ` + PR |
 | `/new-skill <nom> <but>` | add a domain skill (and agent if needed) from `templates/skill.md` / `templates/agent.md`, registered everywhere |
 
 ## Agents (`.claude/agents/<name>.md`)
@@ -131,7 +138,7 @@ Skills orchestrate; agents do the work. If sub-agents are unavailable, read the 
 - Start: `git pull --rebase origin main`. End: `uv run scripts/index.py`, commit, `git pull --rebase`, push.
 - One commit per skill run: `doppel(<skill>): <résumé court>` (e.g. `doppel(ingest): 3 items, 5 tâches, 2 questions`).
 - Direct to `main`: every skill except `consolidate` and `improve` (`ask` commits only its run record).
-- Branch + PR: `consolidate` (`consolidate/AAAA-Wnn`), `improve` (`evolve/E-nnn`), and any manual restructuring of existing data.
+- Branch + PR: `consolidate` (`consolidate/AAAA-Wnn`), `improve` (`evolve/E-nnn`), `upgrade` (`template-sync/AAAA-MM-JJ`), and any manual restructuring of existing data.
 - If a session is restricted to another branch (cloud harness), push there and open a PR to `main`; say so in the summary.
 - Never commit secrets or sensitive data; heavy audio/video in `inbox/_raw/` is git-ignored (transcripts are kept); zips, `.eml`, `.msg` are git-ignored everywhere.
 
