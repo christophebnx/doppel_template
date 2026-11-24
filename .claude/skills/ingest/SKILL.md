@@ -19,6 +19,8 @@ Optional list of inbox files; default all `inbox/*.md` listed in `inbox/_index.m
 4. Domain agents registered for ingestion (CLAUDE.md « Domain », e.g. a comms agent drafting follow-ups) — none by default.
 5. **reporter** agent: log lines — one `info` per created task (`T-nnnn créée : <titre>`), one `decision` per decision
    (with `--at` = decision time if known), `done` for completed work reported, `blocked` for new blockers. Source = processed item.
+5b. Weather-constrained tasks created or updated by triage (`climate` set, no `scheduled_on`) → run the /place steps
+   on them (`uv run scripts/weather.py place <ids> --apply`, questions for the missing places).
 6. `uv run scripts/index.py`; sanity checks: no file left in `inbox/` without a question explaining why; every new task
    has ≥ 1 source; `uv run scripts/index.py --check` returns 0.
 7. Commit `doppel(ingest): <n> items, <n> tâches (+<new>/~<updated>), <n> questions`; `git pull --rebase`; push.

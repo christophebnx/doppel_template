@@ -30,3 +30,6 @@ inbox/_raw/**/*.avi
 
 # Generated pages (published as Artifacts, not committed)
 .doppel/
+
+# Weather forecast cache (scripts/weather.py)
+.cache/

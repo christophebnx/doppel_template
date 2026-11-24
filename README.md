@@ -45,6 +45,7 @@ Optional audio/video transcription: `uv sync --extra audio` (faster-whisper).
 | record what I did | `/done T-0004 fini 2h30` |
 | a status for someone | `/status 5j externe demo-project` · `/status 5j interne` |
 | see my day in one minute | `/today` (or open `today.md`) |
+| fit a weather-dependent task (« sec, hors gel, cette semaine ») | say it, or `/place T-0012` |
 | end a conversation (any account, any device) | `/wrap` → « Session supprimable. » |
 | something in doppel is wrong / annoying | `/signal le status est trop long` |
 | review how doppel wants to improve itself | `/evolve` (weekly) → `/evolve approve E-001` → `/improve E-001` |

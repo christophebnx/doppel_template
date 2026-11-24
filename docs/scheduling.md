@@ -48,8 +48,8 @@ Task:
 A. Run the /ingest skill: follow .claude/skills/ingest/SKILL.md in unattended mode on every pending item of inbox/.
    If nothing is pending, skip to B without committing.
 B. Run the scheduled domain skills listed in CLAUDE.md « Domain » (none by default), each in unattended mode.
-C. Run the /today skill: follow .claude/skills/today/SKILL.md (uv run scripts/today.py --write, then the 1–3 focus
-   lines). It must be the last step so that today.md reflects everything above.
+C. Run the /today skill: follow .claude/skills/today/SKILL.md (weather re-check of climate tasks, uv run
+   scripts/today.py --write, then the 1–3 focus lines). It must be the last step so that today.md reflects everything above.
 D. Commit after each skill (doppel(ingest): …, doppel(today): …) and push to main.
 E. Summary: items ingested, tasks created/updated, new questions (ids), outbox files, and the focus lines of today.md.
 ```
